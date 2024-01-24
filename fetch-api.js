@@ -1,16 +1,18 @@
 const urlBase = "https://api.box3.work/api/Contato";
 
-export const getContacts = async () => {
+const getContacts = async () => {
+  console.log("Entrou aqui.");
   try {
     const response = await fetch(url);
     const lista = await response.json();
+    console.log("Chegou aqui.");
     return lista;
   } catch (error) {
     return error;
   }
 };
 
-export const getContact = async (id) => {
+const getContactById = async (id) => {
   try {
     const response = await fetch(`${urlBase}/${id}`);
     const data = await response.json();
@@ -20,7 +22,7 @@ export const getContact = async (id) => {
   }
 }
 
-export const createContact = async (contact) => {
+const createContact = async (contact) => {
   try {
     const response = await fetch(urlBase, {
       method: "POST",
@@ -29,14 +31,16 @@ export const createContact = async (contact) => {
       },
       body: JSON.stringify(contact),
     });
+    console.log(response);
     const data = await response.json();
     return data;
   } catch (error) {
+    console.log(error);
     return error;
   }
 }
 
-export const deleteContact = async (id) => {
+const deleteContact = async (id) => {
   try {
     const response = await fetch(`${urlBase}/${id}`, {
       method: "DELETE",
@@ -48,7 +52,7 @@ export const deleteContact = async (id) => {
   }
 }
 
-export const updateContact = async (id, contact) => {
+const updateContact = async (id, contact) => {
   try {
     const response = await fetch(`${urlBase}/${id}`, {
       method: "PUT",
@@ -62,4 +66,14 @@ export const updateContact = async (id, contact) => {
   } catch (error) {
     return error;
   }
+}
+
+if (typeof module !== 'undefined') {
+  module.exports = {
+    getContacts,
+    getContactById,
+    createContact,
+    deleteContact,
+    updateContact
+  };
 }

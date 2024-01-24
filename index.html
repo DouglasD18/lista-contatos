@@ -5,9 +5,80 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Contatos</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <script src="fetch-api.js" defer></script>
+  <script src="handle-local-storage.js" defer></script>
   <script src="main.js" defer></script>
 </head>
 <body>
+  <div class="container">
+    <h1>Contatos</h1>
+    
+    <button id="addContactButton" type="button" class="btn btn-primary" data-toggle="modal" data-target="#addContactModal">
+      Adicionar Contato
+    </button>
+  
+    <table class="table mt-3">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Telefone</th>
+          <th>Email</th>
+          <th>Ativo</th>
+          <th>Data de Nascimento</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="contactTableBody">
+        <!-- Os contatos serão adicionados aqui dinamicamente -->
+      </tbody>
+    </table>
+  </div>
+  
+  <!-- Modal Adicionar Contato -->
+  <div class="modal" id="addContactModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+  
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <h4 class="modal-title">Adicionar Contato</h4>
+          <button id="close" type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+  
+        <!-- Modal Body -->
+        <div class="modal-body">
+          <form id="addContactForm">
+            <div class="form-group">
+              <label for="nome">Nome:</label>
+              <input type="text" class="form-control" id="nome" required>
+            </div>
+            <div class="form-group">
+              <label for="telefone">Telefone:</label>
+              <input type="telefone" class="form-control" id="telefone" required>
+              <p>Formato: (XX) XXXX-XXXX</p>
+            </div>
+            <div class="form-group">
+              <label for="email">Email:</label>
+              <input type="email" class="form-control" id="email" required>
+            </div>
+            <div class="form-group">
+              <label for="ativo">Ativo:</label>
+              <select id="ativo">
+                <option selected value=true>Sim</option>
+                <option value=false>Não</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="dataNascimento">Data de nascimento:</label>
+              <input type="date" class="form-control" id="dataNascimento" required>
+            </div>
+            <button id="salvar" type="button" class="btn btn-success">Salvar</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
   
 </body>
 </html>
