@@ -10,6 +10,16 @@ export const getContacts = async () => {
   }
 };
 
+export const getContact = async (id) => {
+  try {
+    const response = await fetch(`${urlBase}/${id}`);
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    return error;
+  }
+}
+
 export const createContact = async (contact) => {
   try {
     const response = await fetch(urlBase, {
