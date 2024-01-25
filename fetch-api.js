@@ -1,11 +1,10 @@
-const urlBase = "https://api.box3.work/api/Contato";
+const token = "d83aa658-6caa-43ee-ab28-c76423dc6f05";
+const urlBase = `https://api.box3.work/api/Contato/${token}`;
 
 const getContacts = async () => {
-  console.log("Entrou aqui.");
   try {
-    const response = await fetch(url);
+    const response = await fetch(urlBase);
     const lista = await response.json();
-    console.log("Chegou aqui.");
     return lista;
   } catch (error) {
     return error;
