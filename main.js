@@ -6,8 +6,29 @@ const container = document.querySelector('.container');
 const regexTelefone = /^\(\d{2}\) \d{4}-\d{4}$/;
 const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+const formatDataNascimento = (dataNascimento) => {
+  const [ano, mes, dia] = dataNascimento.split('-');
+  return `${dia[0]}${dia[1]}/${mes}/${ano}`;
+}
+
+
 const clearModal = () => {
-  location.reload();
+  addContactModal.style.display = "none";
+}
+
+const handleModalValues = () => {
+  const salvar = document.getElementById('salvar');
+  salvar.disabled = true;
+
+  const nome = document.getElementById('nome').value;
+  const email = document.getElementById('email').value;
+  const telefone = document.getElementById('telefone').value;
+  const ativo = document.getElementById('ativo').value;
+  const dataNascimento = document.getElementById('dataNascimento').value;
+
+  if (nome && email && telefone && ativo && dataNascimento && regexTelefone.test(telefone) && regexEmail.test(email)) {
+    salvar.disabled = false;
+  }
 }
 
 // Cria mensagem de carregamento enquanto está sendo feita a requisição à API.
@@ -34,16 +55,41 @@ const updateContactListener = async (id) => {
   const contact = getContactById(id);
   if (contact) {
     addContactModal.style.display = "block";
-    const nome = document.getElementById('nome').value;
-    const email = document.getElementById('email').value;
-    const telefone = document.getElementById('telefone').value;
-    const ativo = document.getElementById('ativo').value == "true";
-    const dataNascimento = document.getElementById('dataNascimento').value;
+    const close = document.getElementById('close');
 
-    await updateContact(id, { nome, email, telefone, ativo, dataNascimento });
-    setLocalStorageContacts("");
-  
-    clearModal();
+    // Evento que controla o clique no botão de fechar o modal de adicionar contato.
+    close.addEventListener('click', function () {
+      clearModal();
+    });
+
+    addContactForm.addEventListener('change', handleModalValues);
+
+    const salvar = document.getElementById('salvar');
+    salvar.addEventListener('click', async () => {
+      const nome = document.getElementById('nome').value;
+      const email = document.getElementById('email').value;
+      const telefone = document.getElementById('telefone').value;
+      const ativo = document.getElementById('ativo').value == "true";
+      const dataNascimento = document.getElementById('dataNascimento').value;
+
+      await updateContact(id, { nome, email, telefone, ativo, dataNascimento });
+    
+      clearModal();
+
+      const contacts = await getContacts();
+      handleContacts(contacts);
+    })
+  }
+}
+
+// Função que faz a renderização condicional
+const handleContacts = (contacts) => {
+  contactTableBody.innerHTML = "";
+
+  if (contacts && contacts.length > 0) {
+    contacts.forEach(contact => { 
+      appendContactToTable(contact);
+    });
   }
 }
 
@@ -57,23 +103,21 @@ const appendContactToTable = (contact) => {
     <td>${telefone}</td>
     <td>${email}</td>
     <td>${ativo}</td>
-    <td>${dataNascimento}</td>
+    <td>${formatDataNascimento(dataNascimento)}</td>
     <td>
       <button class="btn btn-warning btn-sm">Editar</button>
       <button class="btn btn-danger btn-sm">Excluir</button>
     </td>
   `;
-  console.log(row.innerHTML);
 
   const editButton = row.querySelector('.btn-warning');
-  editButton.addEventListener('click', updateContactListener(id));
+  editButton.addEventListener('click', () => updateContactListener(id));
 
   const deleteButton = row.querySelector('.btn-danger');
   deleteButton.addEventListener('click', async (event) => {
     await deleteContact(id);
-    const contactRow = event.target;
-    contactRow.remove();
-    setLocalStorageContacts(contactTableBody);
+    const contacts = await getContacts();
+    handleContacts(contacts);
   });
 
   contactTableBody.appendChild(row);
@@ -81,33 +125,22 @@ const appendContactToTable = (contact) => {
 
 // Função para carregar a lista de contatos
 const loadContacts = async () => {
-  let contacts = getLocalStorageContacts();
+  createLoadingMessage();
+  contacts = await getContacts();
+  deleteLoadingMessage();
   if (contacts && contacts.length > 0) {
-    contactTableBody.innerHTML = contacts;
-  } else {
-    createLoadingMessage();
-    contacts = await getContacts();
-    deleteLoadingMessage();
-    if (contacts && contacts.length > 0) {
-      contacts.forEach(contact => {
-        appendContactToTable(contact);
-      });
-      setLocalStorageContacts(contactTableBody);
-    }
+    handleContacts(contacts);
   }
 }
 
 // Função para adicionar ou editar um contato
-const saveContact = async (name, email, telefone, ativo, dataNascimento) => {
-  const contact = await createContact({name, email, telefone, ativo, dataNascimento});
+const saveContact = async (nome, email, telefone, ativo, dataNascimento) => {
+  const contact = await createContact({ nome, email, telefone, ativo, dataNascimento });
   appendContactToTable(contact);
-  setLocalStorageContacts(contactTableBody);
 }
 
 document.addEventListener('DOMContentLoaded', async function () {
   const addContactButton = document.getElementById('addContactButton');
-  const salvar = document.getElementById('salvar');
-  salvar.disabled = true;
 
   // Evento que controla o clique no botão de adicionar contato.
   addContactButton.addEventListener('click', async function () {
@@ -120,17 +153,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     });
 
     // Evento que controla as mudanças de valores no formulário de adição de contato.
-    addContactForm.addEventListener('change', function () {
-      const nome = document.getElementById('nome').value;
-      const email = document.getElementById('email').value;
-      const telefone = document.getElementById('telefone').value;
-      const ativo = document.getElementById('ativo').value;
-      const dataNascimento = document.getElementById('dataNascimento').value;
-  
-      if (nome && email && telefone && ativo && dataNascimento && regexTelefone.test(telefone) && regexEmail.test(email)) {
-        salvar.disabled = false;
-      }
-    });
+    addContactForm.addEventListener('change', handleModalValues);
   
     // Evento de envio do formulário
     salvar.addEventListener('click', async function (event) {
