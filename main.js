@@ -3,7 +3,7 @@ const addContactForm = document.getElementById('addContactForm');
 const addContactModal = document.getElementById('addContactModal');
 const container = document.querySelector('.container');
 
-const regexTelefone = /^\(\d{2}\) \d{4}-\d{4}$/;
+const regexTelefone = /^(\d{10}|\d{11})$/;
 const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const formatDataNascimento = (dataNascimento) => {
@@ -11,8 +11,25 @@ const formatDataNascimento = (dataNascimento) => {
   return `${dia[0]}${dia[1]}/${mes}/${ano}`;
 }
 
+const formatTelefone = (telefone) => {
+  const ddd = telefone.slice(0, 2);
+  let numero = telefone.slice(2);
+  
+  if (numero.length === 8) {
+    numero = numero.slice(0, 4) + '-' + numero.slice(4);
+  } else if (numero.length === 9) {
+    numero = numero.slice(0, 5) + '-' + numero.slice(5);
+  }
+  
+  return `(${ddd}) ${numero}`;
+}
 
 const clearModal = () => {
+  document.getElementById('nome').value = "";
+  document.getElementById('email').value = "";
+  document.getElementById('telefone').value = "";
+  document.getElementById('ativo').value = "true";
+  document.getElementById('dataNascimento').value = "";
   addContactModal.style.display = "none";
 }
 
@@ -26,7 +43,7 @@ const handleModalValues = () => {
   const ativo = document.getElementById('ativo').value;
   const dataNascimento = document.getElementById('dataNascimento').value;
 
-  if (nome && email && telefone && ativo && dataNascimento && regexTelefone.test(telefone) && regexEmail.test(email)) {
+  if (nome && email && telefone && ativo && dataNascimento && regexTelefone.test(telefone.replace(/\s/g, '').trim()) && regexEmail.test(email)) {
     salvar.disabled = false;
   }
 }
@@ -52,7 +69,8 @@ const deleteLoadingMessage = () => {
 };
 
 const updateContactListener = async (id) => {
-  const contact = getContactById(id);
+  const contact = await getContactById(id);
+
   if (contact) {
     addContactModal.style.display = "block";
     const close = document.getElementById('close');
@@ -100,7 +118,7 @@ const appendContactToTable = (contact) => {
   const row = document.createElement('tr');
   row.innerHTML = `
     <td>${nome}</td>
-    <td>${telefone}</td>
+    <td>${formatTelefone(telefone)}</td>
     <td>${email}</td>
     <td>${ativo}</td>
     <td>${formatDataNascimento(dataNascimento)}</td>

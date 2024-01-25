@@ -30,11 +30,9 @@ const createContact = async (contact) => {
       },
       body: JSON.stringify(contact),
     });
-    console.log(response);
     const data = await response.json();
     return data;
   } catch (error) {
-    console.log(error);
     return error;
   }
 }
