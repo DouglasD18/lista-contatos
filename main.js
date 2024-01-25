@@ -12,8 +12,9 @@ const formatDataNascimento = (dataNascimento) => {
 }
 
 const formatTelefone = (telefone) => {
-  const ddd = telefone.slice(0, 2);
-  let numero = telefone.slice(2);
+  const formated = telefone.replace(/\s/g, '').trim();
+  const ddd = formated.slice(0, 2);
+  let numero = formated.slice(2);
   
   if (numero.length === 8) {
     numero = numero.slice(0, 4) + '-' + numero.slice(4);
@@ -33,18 +34,17 @@ const clearModal = () => {
   addContactModal.style.display = "none";
 }
 
-const handleModalValues = () => {
-  const salvar = document.getElementById('salvar');
-  salvar.disabled = true;
+const handleModalValues = (type) => {
+  const button = document.getElementById(type);
+  button.disabled = true;
 
   const nome = document.getElementById('nome').value;
   const email = document.getElementById('email').value;
   const telefone = document.getElementById('telefone').value;
-  const ativo = document.getElementById('ativo').value;
   const dataNascimento = document.getElementById('dataNascimento').value;
 
-  if (nome && email && telefone && ativo && dataNascimento && regexTelefone.test(telefone.replace(/\s/g, '').trim()) && regexEmail.test(email)) {
-    salvar.disabled = false;
+  if (nome && email && telefone && dataNascimento && regexTelefone.test(telefone.replace(/\s/g, '').trim()) && regexEmail.test(email)) {
+    button.disabled = false;
   }
 }
 
@@ -73,24 +73,26 @@ const updateContactListener = async (id) => {
 
   if (contact) {
     addContactModal.style.display = "block";
+    const salvar = document.getElementById('salvar');
+    salvar.style.display = "none";
     const close = document.getElementById('close');
-    const { nome,email, telefone, ativo, dataNascimento } = contact;
 
-    document.getElementById('nome').value = nome;
-    document.getElementById('email').value = email;
-    document.getElementById('telefone').value = telefone;
-    document.getElementById('ativo').value = ativo;
-    document.getElementById('dataNascimento').value = dataNascimento.slice(0, 10);
+    document.getElementById('nome').value = contact.nome;
+    document.getElementById('email').value = contact.email;
+    document.getElementById('telefone').value = contact.telefone;
+    document.getElementById('ativo').value = contact.ativo;
+    document.getElementById('dataNascimento').value = contact.dataNascimento.slice(0, 10);
 
     // Evento que controla o clique no botão de fechar o modal de adicionar contato.
     close.addEventListener('click', function () {
       clearModal();
     });
 
-    addContactForm.addEventListener('change', handleModalValues);
+    addContactForm.addEventListener('change', handleModalValues("editar"));
 
-    const salvar = document.getElementById('salvar');
-    salvar.addEventListener('click', async () => {
+    const editar = document.getElementById('editar');
+    editar.style.display = "block";
+    editar.addEventListener('click', async () => {
       const nome = document.getElementById('nome').value;
       const email = document.getElementById('email').value;
       const telefone = document.getElementById('telefone').value;
@@ -99,10 +101,11 @@ const updateContactListener = async (id) => {
 
       await updateContact(id, { nome, email, telefone, ativo, dataNascimento });
     
+
+      editar.style.display = "none";
       clearModal();
 
-      const contacts = await getContacts();
-      handleContacts(contacts);
+      location.reload();
     })
   }
 }
@@ -139,7 +142,7 @@ const appendContactToTable = (contact) => {
   editButton.addEventListener('click', () => updateContactListener(id));
 
   const deleteButton = row.querySelector('.btn-danger');
-  deleteButton.addEventListener('click', async (event) => {
+  deleteButton.addEventListener('click', async () => {
     await deleteContact(id);
     const contacts = await getContacts();
     handleContacts(contacts);
@@ -171,6 +174,8 @@ document.addEventListener('DOMContentLoaded', async function () {
   addContactButton.addEventListener('click', async function () {
     addContactModal.style.display = "block";
     const close = document.getElementById('close');
+    const salvar = document.getElementById('salvar');
+    salvar.disabled = true;
 
     // Evento que controla o clique no botão de fechar o modal de adicionar contato.
     close.addEventListener('click', function () {
@@ -178,7 +183,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     });
 
     // Evento que controla as mudanças de valores no formulário de adição de contato.
-    addContactForm.addEventListener('change', handleModalValues);
+    addContactForm.addEventListener('change', () => handleModalValues('salvar'));
   
     // Evento de envio do formulário
     salvar.addEventListener('click', async function (event) {
