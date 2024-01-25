@@ -74,6 +74,13 @@ const updateContactListener = async (id) => {
   if (contact) {
     addContactModal.style.display = "block";
     const close = document.getElementById('close');
+    const { nome,email, telefone, ativo, dataNascimento } = contact;
+
+    document.getElementById('nome').value = nome;
+    document.getElementById('email').value = email;
+    document.getElementById('telefone').value = telefone;
+    document.getElementById('ativo').value = ativo;
+    document.getElementById('dataNascimento').value = dataNascimento.slice(0, 10);
 
     // Evento que controla o clique no botão de fechar o modal de adicionar contato.
     close.addEventListener('click', function () {
